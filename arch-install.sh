@@ -18,14 +18,10 @@ mount $root_part /mnt/btrfs-root
 mkdir /mnt/btrfs-root/__current
 mkdir /mnt/btrfs-root/__snapshot
 btrfs subvolume create /mnt/btrfs-root/__current/ROOT
-btrfs subvolume create /mnt/btrfs-root/__current/ROOT/etc
 btrfs subvolume create /mnt/btrfs-root/__current/var
 
 mkdir /mnt/btrfs-current
 mount -o subvol=__current/ROOT     $root_part /mnt/btrfs-current
-
-mkdir /mnt/btrfs-current/etc
-mount -o subvol=__current/ROOT/etc $root_part /mnt/btrfs-current/etc
 
 mkdir /mnt/btrfs-current/var
 mount -o subvol=__current/var      $root_part /mnt/btrfs-current/var
@@ -49,12 +45,10 @@ pacstrap -i /mnt/btrfs-current base base-devel
 #### setup fstab
 root_part_uuid=$(ls -l /dev/disk/by-uuid | grep $(basename $root_part) | awk '{print $9}')
 genfstab -U -p /mnt/btrfs-current > /mnt/btrfs-current/etc/fstab
-echo "tmpfs                                     /tmp               tmpfs    nodev,nosuid        0 0"                         >> /mnt/btrfs-current/etc/fstab
-echo "tmpfs                                     /dev/shm           tmpfs    nodev,nosuid,noexec 0 0"                         >> /mnt/btrfs-current/etc/fstab
+echo "tmpfs    /tmp        tmpfs    nodev,nosuid        0 0"  >> /mnt/btrfs-current/etc/fstab
+echo "tmpfs    /dev/shm    tmpfs    nodev,nosuid,noexec 0 0"  >> /mnt/btrfs-current/etc/fstab
 
 #### configure system
-arch-chroot /mnt/btrfs-current pacman -S btrfs-progs grub os-prober terminus-font intel-ucode yakuake sudo htop plasma sddm vim
-arch-chroot /mnt/btrfs-current systemctl enable sddm
 arch-chroot /mnt/btrfs-current sed -i "s|#en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|g" /etc/locale.gen
 arch-chroot /mnt/btrfs-current locale-gen
 arch-chroot /mnt/btrfs-current echo "LANG=en_US.UTF-8"      > /etc/locale.conf
@@ -67,6 +61,8 @@ arch-chroot /mnt/btrfs-current echo "$hostname" > /etc/hostname
 ip link
 read -p "Give network interface for DHCPCD: " interface
 arch-chroot /mnt/btrfs-current systemctl enable dhcpcd@${interface}.service
+arch-chroot /mnt/btrfs-current pacman -S btrfs-progs grub os-prober terminus-font intel-ucode yakuake sudo htop plasma sddm vim
+arch-chroot /mnt/btrfs-current systemctl enable sddm
 arch-chroot /mnt/btrfs-current sed -i "s|MODULES=\"\"|MODULES=\"crc32c\"|g" /etc/mkinitcpio.conf
 arch-chroot /mnt/btrfs-current sed -i "s| fsck\"| fsck btrfs\"|g"           /etc/mkinitcpio.conf
 arch-chroot /mnt/btrfs-current mkinitcpio -p linux
