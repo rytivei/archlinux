@@ -31,7 +31,7 @@ mkdir /mnt/btrfs-current/var
 mount -o subvol=__current/var $root_part /mnt/btrfs-current/var
 
 mkdir /mnt/btrfs-current/var/lib
-mount --bind /mnt/btrfs-root/__current/ROOT/var/lib
+mount --bind /mnt/btrfs-root/__current/ROOT/var/lib /mnt/btrfs-current/var/lib
 
 read -p "Give full path to BOOT partition: " boot_part
 mkfs.ext2 $boot_part
