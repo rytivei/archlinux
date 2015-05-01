@@ -18,17 +18,17 @@ mount $root_part /mnt/btrfs-root
 mkdir /mnt/btrfs-root/__current
 mkdir /mnt/btrfs-root/__snapshot
 btrfs subvolume create /mnt/btrfs-root/__current/ROOT
-btrfs subvolume create /mnt/btrfs-root/__current/etc
+btrfs subvolume create /mnt/btrfs-root/__current/ROOT/etc
 btrfs subvolume create /mnt/btrfs-root/__current/var
 
 mkdir /mnt/btrfs-current
-mount -o subvol=__current/ROOT $root_part /mnt/btrfs-current
+mount -o subvol=__current/ROOT     $root_part /mnt/btrfs-current
 
 mkdir /mnt/btrfs-current/etc
-mount -o subvol=__current/etc $root_part /mnt/btrfs-current/etc
+mount -o subvol=__current/ROOT/etc $root_part /mnt/btrfs-current/etc
 
 mkdir /mnt/btrfs-current/var
-mount -o subvol=__current/var $root_part /mnt/btrfs-current/var
+mount -o subvol=__current/var      $root_part /mnt/btrfs-current/var
 
 mkdir /mnt/btrfs-current/var/lib
 mount --bind /mnt/btrfs-root/__current/ROOT/var/lib /mnt/btrfs-current/var/lib
@@ -47,7 +47,7 @@ mkswap $swap_part
 swapon $swap_part
 
 #### install base system
-pacstrap /mnt/btrfs-current base base-devel btrfs-progs grub os-prober
+pacstrap /mnt/btrfs-current base base-devel btrfs-progs grub os-prober terminus-font
 
 #### setup fstab
 root_part_uuid=$(ls -l /dev/disk/by-uuid | grep $root_part | awk '{print $9}')
@@ -60,10 +60,9 @@ echo "UUID=$root_part_uuid                      /run/btrfs-root    btrfs    rw,n
 #### configure system
 arch-chroot /mnt/btrfs-current sed -i "s|#en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|g" /etc/locale.gen
 arch-chroot /mnt/btrfs-current locale-gen
-arch-chroot /mnt/btrfs-current echo "LANG=en_US.UTF-8" > /etc/locale.conf
-arch-chroot /mnt/btrfs-current echo "KEYMAP=fi" > /etc/vconsole.conf
+arch-chroot /mnt/btrfs-current echo "LANG=en_US.UTF-8"      > /etc/locale.conf
+arch-chroot /mnt/btrfs-current echo "KEYMAP=fi"             > /etc/vconsole.conf
 arch-chroot /mnt/btrfs-current echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
-arch-chroot /mnt/btrfs-current pacman -S terminus-font
 arch-chroot /mnt/btrfs-current ln -s /usr/share/zoneinfo/Europe/Helsinki /etc/localtime
 arch-chroot /mnt/btrfs-current hwclock --systohc --utc
 read -p "Give a hostname: " hostname
@@ -72,7 +71,7 @@ ip link
 read -p "Give network interface for DHCPCD: " interface
 arch-chroot /mnt/btrfs-current systemctl enable dhcpcd@${interface}.service
 arch-chroot /mnt/btrfs-current sed -i "s|MODULES=\"\"|MODULES=\"crc32c\"|g" /etc/mkinitcpio.conf
-arch-chroot /mnt/btrfs-current sed -i "s| fsck"| fsck btrfs"|g" /etc/mkinitcpio.conf
+arch-chroot /mnt/btrfs-current sed -i "s| fsck"| fsck btrfs"|g"             /etc/mkinitcpio.conf
 arch-chroot /mnt/btrfs-current mkinitcpio -p linux
 read -p "Give full path to BOOT __device__: " boot_dev
 arch-chroot /mnt/btrfs-current grub-install --target=i386-pc --recheck --debug $boot_dev
