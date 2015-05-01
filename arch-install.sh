@@ -47,43 +47,41 @@ echo 'tmpfs /tmp tmpfs nodev,nosuid 0 0' >> /mnt/root/etc/fstab
 echo 'tmpfs /dev/shm tmpfs nodev,nosuid,noexec 0 0' >> /mnt/root/etc/fstab
 
 #### configure system
-arch-chroot /mnt/root /bin/bash
+arch-chroot /mnt/root sed -i 's|#en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|g' /etc/locale.gen
+arch-chroot /mnt/root locale-gen
+arch-chroot /mnt/root echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+arch-chroot /mnt/root export LANG=en_US.UTF-8
 
-sed -i 's|#en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|g' /etc/locale.gen
-locale-gen
-echo 'LANG=en_US.UTF-8' > /etc/locale.conf
-export LANG=en_US.UTF-8
+arch-chroot /mnt/root echo 'KEYMAP=fi' > /etc/vconsole.conf
+arch-chroot /mnt/root echo 'FONT=Lat2-Terminus16' >> /etc/vconsole.conf
+arch-chroot /mnt/root pacman -S terminus-font
 
-echo 'KEYMAP=fi' > /etc/vconsole.conf
-echo 'FONT=Lat2-Terminus16' >> /etc/vconsole.conf
-pacman -S terminus-font
+arch-chroot /mnt/root ln -s /usr/share/zoneinfo/Europe/Helsinki /etc/localtime
 
-ln -s /usr/share/zoneinfo/Europe/Helsinki /etc/localtime
-
-hwclock --systohc --utc
+arch-chroot /mnt/root hwclock --systohc --utc
 
 read -p "Give a hostname: " hostname
-echo "$hostname" > /etc/hostname
+arch-chroot /mnt/root echo "$hostname" > /etc/hostname
+
 ######################### nano /etc/hosts
 
 ip link
 read -p "Give network interface for DHCPCD: " interface
-systemctl enable dhcpcd@${interface}.service
+arch-chroot /mnt/root systemctl enable dhcpcd@${interface}.service
 
-pacman -S btrfs-progs grub os-prober
-read -p "Set bootable partition. Open cfdisk by pressing ENTER..." x
-cfdisk
+arch-chroot /mnt/root pacman -S btrfs-progs grub os-prober
+#### read -p "Set bootable partition. Open cfdisk by pressing ENTER..." x
+#### cfdisk
 read -p "Give full path to BOOT __device__: " boot_dev
-grub-install --target=i386-pc --recheck --debug $boot_dev
+arch-chroot /mnt/root grub-install --target=i386-pc --recheck --debug $boot_dev
 
-sed -i 's|MODULES=""|MODULES="crc32c"|g' /etc/mkinitcpio.conf
-sed -i 's| fsck"| fsck btrfs"|g' /etc/mkinitcpio.conf
-mkinitcpio -p linux
+arch-chroot /mnt/root sed -i 's|MODULES=""|MODULES="crc32c"|g' /etc/mkinitcpio.conf
+arch-chroot /mnt/root sed -i 's| fsck"| fsck btrfs"|g' /etc/mkinitcpio.conf
+arch-chroot /mnt/root mkinitcpio -p linux
 
-sed -i 's|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX="init=/lib/systemd/systemd rootflags=subvol=vol-root ipv6.disable=1"|' /etc/default/grub
-grub-mkconfig -o /boot/grub/grub.cfg
+arch-chroot /mnt/root sed -i 's|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX="init=/lib/systemd/systemd rootflags=subvol=vol-root ipv6.disable=1"|' /etc/default/grub
+arch-chroot /mnt/root grub-mkconfig -o /boot/grub/grub.cfg
 
-passwd
-exit
+arch-chroot /mnt/root passwd
 umount -R /mnt/root
 reboot
