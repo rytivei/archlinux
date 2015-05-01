@@ -30,9 +30,6 @@ mount -o subvol=__current/ROOT/etc $root_part /mnt/btrfs-current/etc
 mkdir /mnt/btrfs-current/var
 mount -o subvol=__current/var      $root_part /mnt/btrfs-current/var
 
-mkdir /mnt/btrfs-current/var/lib
-mount --bind /mnt/btrfs-root/__current/ROOT/var/lib /mnt/btrfs-current/var/lib
-
 read -p "Give full path to BOOT partition: " boot_part
 mkfs.ext2 $boot_part
 mkdir /mnt/btrfs-current/boot
@@ -54,15 +51,8 @@ root_part_uuid=$(ls -l /dev/disk/by-uuid | grep $(basename $root_part) | awk '{p
 genfstab -U -p /mnt/btrfs-current > /mnt/btrfs-current/etc/fstab
 echo "tmpfs                                     /tmp               tmpfs    nodev,nosuid        0 0"                         >> /mnt/btrfs-current/etc/fstab
 echo "tmpfs                                     /dev/shm           tmpfs    nodev,nosuid,noexec 0 0"                         >> /mnt/btrfs-current/etc/fstab
-echo "/run/btrfs-root/__current/ROOT/var/lib    /var/lib           none     bind                0 0"                         >> /mnt/btrfs-current/etc/fstab
-echo "UUID=$root_part_uuid                      /run/btrfs-root    btrfs    rw,nodev,nosuid,noexec,relatime,space_cache 0 0" >> /mnt/btrfs-current/etc/fstab
 
 #### configure system
-
-if [ ! -e /mnt/btrfs-current/var/lib/pacman ]; then
-    mkdir /mnt/btrfs-current/var/lib/pacman
-fi
-arch-chroot /mnt/btrfs-current pacman -Syyu
 arch-chroot /mnt/btrfs-current pacman -S btrfs-progs grub os-prober terminus-font intel-ucode yakuake sudo htop plasma sddm vim
 arch-chroot /mnt/btrfs-current systemctl enable sddm
 arch-chroot /mnt/btrfs-current sed -i "s|#en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|g" /etc/locale.gen
@@ -87,4 +77,4 @@ arch-chroot /mnt/btrfs-current grub-mkconfig -o /boot/grub/grub.cfg
 arch-chroot /mnt/btrfs-current passwd
 
 echo "check your system setup now ..."
-echo "then run 'umount -R /mnt/btrfs-root && reboot'"
+echo "then run 'umount -R /mnt/btrfs-current && reboot'"
