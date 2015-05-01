@@ -50,7 +50,7 @@ echo 'tmpfs /dev/shm tmpfs nodev,nosuid,noexec 0 0' >> /mnt/root/etc/fstab
 arch-chroot /mnt/root sed -i 's|#en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|g' /etc/locale.gen
 arch-chroot /mnt/root locale-gen
 arch-chroot /mnt/root echo 'LANG=en_US.UTF-8' > /etc/locale.conf
-arch-chroot /mnt/root export LANG=en_US.UTF-8
+arch-chroot /mnt/root 'export LANG=en_US.UTF-8'
 
 arch-chroot /mnt/root echo 'KEYMAP=fi' > /etc/vconsole.conf
 arch-chroot /mnt/root echo 'FONT=Lat2-Terminus16' >> /etc/vconsole.conf
