@@ -50,7 +50,7 @@ swapon $swap_part
 pacstrap -i /mnt/btrfs-current base base-devel btrfs-progs grub os-prober terminus-font
 
 #### setup fstab
-root_part_uuid=$(ls -l /dev/disk/by-uuid | grep $root_part | awk '{print $9}')
+root_part_uuid=$(ls -l /dev/disk/by-uuid | grep $(basename $root_part) | awk '{print $9}')
 genfstab -U -p /mnt/btrfs-current > /mnt/btrfs-current/etc/fstab
 echo "tmpfs                                     /tmp               tmpfs    nodev,nosuid        0 0"                         >> /mnt/btrfs-current/etc/fstab
 echo "tmpfs                                     /dev/shm           tmpfs    nodev,nosuid,noexec 0 0"                         >> /mnt/btrfs-current/etc/fstab
@@ -75,7 +75,7 @@ arch-chroot /mnt/btrfs-current sed -i "s| fsck\"| fsck btrfs\"|g"           /etc
 arch-chroot /mnt/btrfs-current mkinitcpio -p linux
 read -p "Give full path to BOOT __device__: " boot_dev
 arch-chroot /mnt/btrfs-current grub-install --target=i386-pc --recheck --debug $boot_dev
-arch-chroot /mnt/btrfs-current sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"root=$root_part_uuid rootflags=subvol=__current/ROOT init=/lib/systemd/systemd ipv6.disable=1\"|" /etc/default/grub
+arch-chroot /mnt/btrfs-current sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"init=/lib/systemd/systemd ipv6.disable=1\"|" /etc/default/grub
 arch-chroot /mnt/btrfs-current grub-mkconfig -o /boot/grub/grub.cfg
 arch-chroot /mnt/btrfs-current passwd
 umount -R /mnt/btrfs-root
