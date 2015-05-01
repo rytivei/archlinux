@@ -61,7 +61,7 @@ arch-chroot /mnt/btrfs-current echo "$hostname" > /etc/hostname
 ip link
 read -p "Give network interface for DHCPCD: " interface
 arch-chroot /mnt/btrfs-current systemctl enable dhcpcd@${interface}.service
-arch-chroot /mnt/btrfs-current pacman -S btrfs-progs grub os-prober terminus-font intel-ucode yakuake sudo htop plasma sddm vim nvidia libvdpau
+arch-chroot /mnt/btrfs-current pacman -S btrfs-progs grub os-prober terminus-font intel-ucode yakuake sudo htop plasma sddm vim nvidia libvdpau abs
 arch-chroot /mnt/btrfs-current systemctl enable sddm
 arch-chroot /mnt/btrfs-current sed -i "s|MODULES=\"\"|MODULES=\"crc32c\"|g" /etc/mkinitcpio.conf
 arch-chroot /mnt/btrfs-current sed -i "s| fsck\"| fsck btrfs\"|g"           /etc/mkinitcpio.conf
@@ -71,6 +71,9 @@ arch-chroot /mnt/btrfs-current grub-install --target=i386-pc --recheck --debug $
 arch-chroot /mnt/btrfs-current sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"init=/lib/systemd/systemd ipv6.disable=1\"|" /etc/default/grub
 arch-chroot /mnt/btrfs-current grub-mkconfig -o /boot/grub/grub.cfg
 arch-chroot /mnt/btrfs-current passwd
+useradd -G wheel,users,uucp -s /bin/bash koopra
+chfn koopra
+passwd koopra
 
 umount -R /mnt/btrfs-current
 umount -R /mnt/btrfs-root
