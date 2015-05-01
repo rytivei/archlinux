@@ -71,7 +71,7 @@ ip link
 read -p "Give network interface for DHCPCD: " interface
 arch-chroot /mnt/btrfs-current systemctl enable dhcpcd@${interface}.service
 arch-chroot /mnt/btrfs-current sed -i "s|MODULES=\"\"|MODULES=\"crc32c\"|g" /etc/mkinitcpio.conf
-arch-chroot /mnt/btrfs-current sed -i "s| fsck"| fsck btrfs"|g"             /etc/mkinitcpio.conf
+arch-chroot /mnt/btrfs-current sed -i "s| fsck\"| fsck btrfs\"|g"           /etc/mkinitcpio.conf
 arch-chroot /mnt/btrfs-current mkinitcpio -p linux
 read -p "Give full path to BOOT __device__: " boot_dev
 arch-chroot /mnt/btrfs-current grub-install --target=i386-pc --recheck --debug $boot_dev
