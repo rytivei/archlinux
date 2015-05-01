@@ -47,7 +47,7 @@ mkswap $swap_part
 swapon $swap_part
 
 #### install base system
-pacstrap -i /mnt/btrfs-current base base-devel btrfs-progs grub os-prober terminus-font
+pacstrap -i /mnt/btrfs-current base base-devel
 
 #### setup fstab
 root_part_uuid=$(ls -l /dev/disk/by-uuid | grep $(basename $root_part) | awk '{print $9}')
@@ -58,6 +58,8 @@ echo "/run/btrfs-root/__current/ROOT/var/lib    /var/lib           none     bind
 echo "UUID=$root_part_uuid                      /run/btrfs-root    btrfs    rw,nodev,nosuid,noexec,relatime,space_cache 0 0" >> /mnt/btrfs-current/etc/fstab
 
 #### configure system
+arch-chroot /mnt/btrfs-current pacman -S btrfs-progs grub os-prober terminus-font intel-ucode yakuake sudo htop plasma sddm vim
+arch-chroot /mnt/btrfs-current systemctl enable sddm
 arch-chroot /mnt/btrfs-current sed -i "s|#en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|g" /etc/locale.gen
 arch-chroot /mnt/btrfs-current locale-gen
 arch-chroot /mnt/btrfs-current echo "LANG=en_US.UTF-8"      > /etc/locale.conf
