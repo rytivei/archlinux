@@ -58,6 +58,11 @@ echo "/run/btrfs-root/__current/ROOT/var/lib    /var/lib           none     bind
 echo "UUID=$root_part_uuid                      /run/btrfs-root    btrfs    rw,nodev,nosuid,noexec,relatime,space_cache 0 0" >> /mnt/btrfs-current/etc/fstab
 
 #### configure system
+
+if [ ! -e /mnt/btrfs-current/var/lib/pacman ]; then
+    mkdir /mnt/btrfs-current/var/lib/pacman
+fi
+arch-chroot /mnt/btrfs-current pacman -Syyu
 arch-chroot /mnt/btrfs-current pacman -S btrfs-progs grub os-prober terminus-font intel-ucode yakuake sudo htop plasma sddm vim
 arch-chroot /mnt/btrfs-current systemctl enable sddm
 arch-chroot /mnt/btrfs-current sed -i "s|#en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|g" /etc/locale.gen
@@ -80,5 +85,6 @@ arch-chroot /mnt/btrfs-current grub-install --target=i386-pc --recheck --debug $
 arch-chroot /mnt/btrfs-current sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"init=/lib/systemd/systemd ipv6.disable=1\"|" /etc/default/grub
 arch-chroot /mnt/btrfs-current grub-mkconfig -o /boot/grub/grub.cfg
 arch-chroot /mnt/btrfs-current passwd
-umount -R /mnt/btrfs-root
-reboot
+
+echo "check your system setup now ..."
+echo "then run 'umount -R /mnt/btrfs-root && reboot'"
