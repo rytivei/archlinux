@@ -47,7 +47,7 @@ mkswap $swap_part
 swapon $swap_part
 
 #### install base system
-pacstrap /mnt/btrfs-current base base-devel btrfs-progs grub os-prober terminus-font
+pacstrap -i /mnt/btrfs-current base base-devel btrfs-progs grub os-prober terminus-font
 
 #### setup fstab
 root_part_uuid=$(ls -l /dev/disk/by-uuid | grep $root_part | awk '{print $9}')
