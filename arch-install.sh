@@ -71,9 +71,9 @@ arch-chroot /mnt/btrfs-current grub-install --target=i386-pc --recheck --debug $
 arch-chroot /mnt/btrfs-current sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"init=/lib/systemd/systemd ipv6.disable=1\"|" /etc/default/grub
 arch-chroot /mnt/btrfs-current grub-mkconfig -o /boot/grub/grub.cfg
 arch-chroot /mnt/btrfs-current passwd
-useradd -G wheel,users,uucp -s /bin/bash koopra
-chfn koopra
-passwd koopra
+arch-chroot /mnt/btrfs-current useradd -G wheel,users,uucp -s /bin/bash koopra
+arch-chroot /mnt/btrfs-current chfn koopra
+arch-chroot /mnt/btrfs-current passwd koopra
 
 umount -R /mnt/btrfs-current
 umount -R /mnt/btrfs-root
