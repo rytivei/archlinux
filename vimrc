@@ -102,13 +102,14 @@ augroup END " }
 
 noremap <silent> <F1>               :help<CR>
 noremap <silent> <F2>               :call ToggleVExplorer()<CR>
+noremap <silent> <F2><F2>           :Explore!<CR>
 let g:lt_quickfix_list_toggle_map = '<F3>'
 let g:lt_location_list_toggle_map = '<F4>'
 let g:ctrlp_map                   = '<F6>'
 
 "---- [NORMAL KEY MAPPINGS] ----"
-nnoremap <Leader><Tab>      :bnext<CR>
-nnoremap <Leader><Tab><Tab> :bprevious<CR>
+nnoremap <Tab>              :bnext<CR>
+nnoremap <Leader><Tab>      :bprevious<CR>
 nnoremap <Leader><Right>    <C-w>l
 nnoremap <Leader><Up>       <C-w>k
 nnoremap <Leader><Down>     <C-w>j
