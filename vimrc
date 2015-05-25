@@ -1,4 +1,16 @@
 " =============================================================================
+" -- SET LANGUAGE (UI/MENUS) ---- SET LANGUAGE (UI/MENUS) ---- SET LANGUAGE (UI
+" =============================================================================
+
+if has('win32')
+    if has('gui_running')
+        set langmenu=en
+        set guifont=Lucida_Console:h9
+	language messages EN	
+    endif
+endif
+
+" =============================================================================
 " -- VUNDLE ---- VUNDLE ---- VUNDLE ---- VUNDLE ---- VUNDLE ---- VUNDLE ---- VU
 " =============================================================================
 
@@ -10,9 +22,12 @@ let iCanHazVundle=1
 if has ('win32')
     let vundle_readme=expand('$HOME/vimfiles/bundle/vundle/README.md')
     if !filereadable(vundle_readme)
-        silent !mkdir $HOME/vimfiles/bundle
-        silent !git clone https://github.com/gmarik/vundle $HOME/vimfiles/bundle/vundle
-        let iCanHazVundle=0
+        :echom "Open a command prompt (cmd.exe)"
+        :echom "cd %USERPROFILE%"
+        :echom "git clone https://github.com/gmarik/vundle vimfiles/bundle/vundle"
+        :echom "--"
+        :echom "Manually install Bundles with :BundleInstall after restart."
+        :quit
     endif
 else
     let vundle_readme=expand('~/.vim/bundle/vundle/README.md')
@@ -98,9 +113,9 @@ nnoremap <Leader><Right>    <C-w>l
 nnoremap <Leader><Up>       <C-w>k
 nnoremap <Leader><Down>     <C-w>j
 nnoremap <Leader><Left>     <C-w>h
-nnoremap <Leader>r       :q<CR>
-nnoremap <Leader>rr      :bdelete<CR>
-nnoremap <Leader>s       :w !sudo tee %
+nnoremap <Leader>r          :q<CR>
+nnoremap <Leader>rr         :bdelete<CR>
+nnoremap <Leader>s          :w !sudo tee %
 
 """" search trailing spaces
 nnoremap <Leader>w       /\s\+$<CR>
@@ -126,10 +141,6 @@ endif
 " =============================================================================
 
 if has('win32')
-    if has('gui_running')
-        set langmenu=en
-        set guifont=Lucida_Console:h9
-    endif
 endif
 
 " =============================================================================
@@ -176,7 +187,7 @@ let g:airline_symbols.paste = 'Þ'
 let g:airline_symbols.paste = '∥'
 let g:airline_symbols.whitespace = 'Ξ'
 
-let g:airline#extensions#bufferline#enabled = 1
+let g:airline#extensions#tabline#enabled = 1
 
 " ============================================================================= 
 " -- NETRW CONFIG ---- NETRW CONFIG ---- NETRW CONFIG ---- NETRW CONFIG ---- NE 
