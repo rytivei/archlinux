@@ -6,7 +6,7 @@ if has('win32')
     if has('gui_running')
         set langmenu=en
         set guifont=Lucida_Console:h9
-	language messages EN	
+	language messages EN
     endif
 endif
 
@@ -38,7 +38,7 @@ else
     endif
 endif
 
-if has ('win32')    
+if has ('win32')
     set rtp+=$HOME/vimfiles/bundle/vundle/
     let path='$HOME/vimfiles/bundle'
 else
@@ -51,13 +51,13 @@ call vundle#begin(path)
 Bundle 'gmarik/vundle'
 Bundle 'bling/vim-airline'
 Bundle 'kien/ctrlp.vim'
+Bundle 'scrooloose/syntastic'
 
 """"Bundle 'bling/vim-bufferline'
 """"Bundle 'tpope/vim-fugitive'
 """"Bundle 'tpope/vim-surround'
 """"Bundle 'vim-scripts/a.vim'
 """"Bundle 'darvelo/vim-systemd'
-""""Bundle 'scrooloose/syntastic'
 """"Bundle 'valloric/listtoggle'
 
 call vundle#end()
@@ -81,12 +81,12 @@ set smartcase
 set tabstop=4
 set shiftwidth=4
 set expandtab
-""""set autoindent
 syntax enable
 :highlight Pmenu ctermbg=238 gui=bold
-let g:netrw_keepdir=0
 let mapleader = "§"
-let g:bufferline_echo = 0
+
+"---- [NETRW] ----"
+let g:netrw_keepdir=0
 let g:netrw_chgwin=1
 
 augroup reload_vimrc " {
@@ -99,40 +99,53 @@ augroup END " }
 " =============================================================================
 
 "---- [FUNCTION KEY MAPPINGS] ----"
-
 noremap <silent> <F1>               :help<CR>
 noremap <silent> <F2>               :call ToggleVExplorer()<CR>
-noremap <silent> <F2><F2>           :Explore!<CR>
 let g:lt_quickfix_list_toggle_map = '<F3>'
 let g:lt_location_list_toggle_map = '<F4>'
 let g:ctrlp_map                   = '<F6>'
 
 "---- [NORMAL KEY MAPPINGS] ----"
-nnoremap <Tab>              :bnext<CR>
-nnoremap <Leader><Tab>      :bprevious<CR>
+nnoremap <Tab>              :bnext!<CR>
+nnoremap <Leader><Tab>      :bprevious!<CR>
 nnoremap <Leader><Right>    <C-w>l
 nnoremap <Leader><Up>       <C-w>k
 nnoremap <Leader><Down>     <C-w>j
 nnoremap <Leader><Left>     <C-w>h
 nnoremap <Leader>r          :q<CR>
 nnoremap <Leader>rr         :bdelete<CR>
+
+"""" open with sudo
 nnoremap <Leader>s          :w !sudo tee %
 
 """" search trailing spaces
-nnoremap <Leader>w       /\s\+$<CR>
+nnoremap <Leader>w           /\s\+$<CR>
 
 """" comment/ uncomment in V-LINE mode
-vmap <S-c>               :s/^/#/<CR> :noh<CR>
-vmap <S-c><S-c>          :s/^#//<CR> :noh<CR>
+vmap <S-c>                  :s/^/#/<CR> :noh<CR>
+vmap <S-c><S-c>             :s/^#//<CR> :noh<CR>
+
+"---- [PLUGIN MAPPINGS] ----"
+
+"""" vim-airline
+nmap <Leader>1 <Plug>AirlineSelectTab1
+nmap <Leader>2 <Plug>AirlineSelectTab2
+nmap <Leader>3 <Plug>AirlineSelectTab3
+nmap <Leader>4 <Plug>AirlineSelectTab4
+nmap <Leader>5 <Plug>AirlineSelectTab5
+nmap <Leader>6 <Plug>AirlineSelectTab6
+nmap <Leader>7 <Plug>AirlineSelectTab7
+nmap <Leader>8 <Plug>AirlineSelectTab8
+nmap <Leader>9 <Plug>AirlineSelectTab9
 
 " =============================================================================
 " -- UNIX SPECIFIC ---- UNIX SPECIFIC ---- UNIX SPECIFIC ---- UNIX SPECIFIC ---
 " =============================================================================
 
 if has('unix')
-    let g:bufferline_echo = 0
-    nnoremap <Leader>+  :vertical resize +5<CR>
-    nnoremap <Leader>-  :vertical resize -5<CR>
+    "---- [NORMAL KEY MAPPINGS] ----"
+    nnoremap <Leader>+  :vertical resize +10<CR>
+    nnoremap <Leader>-  :vertical resize -10<CR>
     nnoremap <Leader>n  :vertical split<CR>
     nnoremap <Leader>ne :vertical split new<CR>
 endif
@@ -143,6 +156,40 @@ endif
 
 if has('win32')
 endif
+
+" =============================================================================
+" -- STATUS LINE ---- STATUS LINE ---- STATUS LINE ---- STATUS LINE ---- STATUS
+" =============================================================================
+
+set laststatus=2
+set t_Co=256
+
+if !exists('g:airline_symbols')
+let g:airline_symbols = {}
+endif
+
+let g:airline_theme='murmur'
+let g:airline_detect_paste = 1
+let g:airline_left_sep = '»'
+let g:airline_left_sep = '▶'
+let g:airline_right_sep = '«'
+let g:airline_right_sep = '◀'
+let g:airline_symbols.linenr = '␊'
+let g:airline_symbols.linenr = '␤'
+let g:airline_symbols.linenr = '¶'
+let g:airline_symbols.branch = '⎇'
+let g:airline_symbols.paste = 'ρ'
+let g:airline_symbols.paste = 'Þ'
+let g:airline_symbols.paste = '∥'
+let g:airline_symbols.whitespace = 'Ξ'
+
+"""" extensions
+let g:airline#extensions#tabline#buffer_idx_mode = 1
+let g:airline#extensions#quickfix#quickfix_text = 'QuickFix'
+let g:airline#extensions#quickfix#location_text = 'SearchList'
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#syntastic#enabled = 1
+let g:airline#extensions#ctrlp#color_template = 'visual'
 
 " =============================================================================
 " -- CTRL-P -- -- CTRL-P -- -- CTRL-P -- -- CTRL-P -- -- CTRL-P -- -- CTRL-P --
@@ -162,57 +209,24 @@ function! ToggleCtrlP()
 endfunction
 
 " =============================================================================
-" -- STATUS LINE ---- STATUS LINE ---- STATUS LINE ---- STATUS LINE ---- STATUS
+" -- NETRW CONFIG ---- NETRW CONFIG ---- NETRW CONFIG ---- NETRW CONFIG ---- NE
 " =============================================================================
 
-set laststatus=2
-set t_Co=256
+function! ToggleVExplorer()
+    if exists("t:explore_buffer_number")
+        let explore_window_number = bufwinnr(t:explore_buffer_number)
+        if explore_window_number != -1
+            let current_window_number = winnr()
+            exec explore_window_number . 'wincmd w'
+            close
+            exec current_window_number . 'wincmd w'
+            unlet t:explore_buffer_number
+        else
+            unlet t:explore_buffer_number
+        endif
+    else
+        Sexplore!
+        let t:explore_buffer_number = bufnr("%")
+    endif
+endfunction
 
-if !exists('g:airline_symbols')
-let g:airline_symbols = {}
-endif
-
-let g:airline_theme='murmur'
-""""let g:airline_powerline_fonts=1
-
-let g:airline_left_sep = '»'
-let g:airline_left_sep = '▶'
-let g:airline_right_sep = '«'
-let g:airline_right_sep = '◀'
-let g:airline_symbols.linenr = '␊'
-let g:airline_symbols.linenr = '␤'
-let g:airline_symbols.linenr = '¶'
-let g:airline_symbols.branch = '⎇'
-let g:airline_symbols.paste = 'ρ'
-let g:airline_symbols.paste = 'Þ'
-let g:airline_symbols.paste = '∥'
-let g:airline_symbols.whitespace = 'Ξ'
-
-let g:airline#extensions#tabline#enabled = 1
-
-" ============================================================================= 
-" -- NETRW CONFIG ---- NETRW CONFIG ---- NETRW CONFIG ---- NETRW CONFIG ---- NE 
-" ============================================================================= 
-
-function! ToggleVExplorer() 
-    if exists("t:expl_buf_num") 
-        unlet g:netrw_liststyle 
-        """"unlet g:netrw_browse_split 
-        let expl_win_num = bufwinnr(t:expl_buf_num) 
-        if expl_win_num != -1 
-            let cur_win_nr = winnr() 
-            exec expl_win_num . 'wincmd w' 
-            close 
-            exec cur_win_nr . 'wincmd w' 
-            unlet t:expl_buf_num 
-        else 
-            unlet t:expl_buf_num 
-        endif 
-    else 
-        let g:netrw_liststyle = 2 
-        """"let g:netrw_browse_split = 4 
-        exec '1wincmd w' 
-        Vexplore 
-        let t:expl_buf_num = bufnr("%") 
-    endif 
-endfunction 
