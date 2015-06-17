@@ -52,6 +52,7 @@ Bundle 'gmarik/vundle'
 Bundle 'bling/vim-airline'
 Bundle 'kien/ctrlp.vim'
 Bundle 'scrooloose/syntastic'
+Bundle 'airblade/vim-gitgutter'
 
 """"Bundle 'bling/vim-bufferline'
 """"Bundle 'tpope/vim-fugitive'
@@ -230,3 +231,9 @@ function! ToggleVExplorer()
     endif
 endfunction
 
+" =============================================================================
+" -- GIT ---- GIT ---- GIT ---- GIT ---- GIT ---- GIT ---- GIT ---- GIT ---- GI
+" =============================================================================
+
+let g:gitgutter_enabled = 1
+let g:gitgutter_highlight_lines = 1
