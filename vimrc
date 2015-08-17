@@ -48,18 +48,17 @@ endif
 
 call vundle#begin(path)
 
+"---- [github] ----"
 Bundle 'gmarik/vundle'
 Bundle 'bling/vim-airline'
 Bundle 'kien/ctrlp.vim'
 Bundle 'scrooloose/syntastic'
 Bundle 'airblade/vim-gitgutter'
-
-""""Bundle 'bling/vim-bufferline'
-""""Bundle 'tpope/vim-fugitive'
-""""Bundle 'tpope/vim-surround'
-""""Bundle 'vim-scripts/a.vim'
-""""Bundle 'darvelo/vim-systemd'
-""""Bundle 'valloric/listtoggle'
+Bundle 'valloric/listtoggle'
+Bundle 'tpope/vim-surround'
+Bundle 'tpope/vim-commentary'
+Bundle 'majutsushi/tagbar'
+Bundle 'ervandew/supertab'
 
 call vundle#end()
 filetype plugin indent on
@@ -82,13 +81,11 @@ set smartcase
 set tabstop=4
 set shiftwidth=4
 set expandtab
+set omnifunc=syntaxcomplete#Complete
 syntax enable
 :highlight Pmenu ctermbg=238 gui=bold
 let mapleader = "§"
 
-"---- [NETRW] ----"
-let g:netrw_keepdir=0
-let g:netrw_chgwin=1
 
 augroup reload_vimrc " {
     autocmd!
@@ -100,11 +97,11 @@ augroup END " }
 " =============================================================================
 
 "---- [FUNCTION KEY MAPPINGS] ----"
-noremap <silent> <F1>               :help<CR>
-noremap <silent> <F2>               :call ToggleVExplorer()<CR>
-let g:lt_quickfix_list_toggle_map = '<F3>'
-let g:lt_location_list_toggle_map = '<F4>'
-let g:ctrlp_map                   = '<F6>'
+nnoremap <F1>                     :vertical help<Space>
+nnoremap <silent><F2>             :TagbarToggle<CR>
+let g:ctrlp_map                   = '<F3>'
+let g:lt_quickfix_list_toggle_map = '<F5>'
+let g:lt_location_list_toggle_map = '<F6>'
 
 "---- [NORMAL KEY MAPPINGS] ----"
 nnoremap <Tab>              :bnext!<CR>
@@ -115,16 +112,13 @@ nnoremap <Leader><Down>     <C-w>j
 nnoremap <Leader><Left>     <C-w>h
 nnoremap <Leader>r          :q<CR>
 nnoremap <Leader>rr         :bdelete<CR>
+nnoremap <Leader>v          :Vexplore<CR>
 
 """" open with sudo
 nnoremap <Leader>s          :w !sudo tee %
 
 """" search trailing spaces
 nnoremap <Leader>w           /\s\+$<CR>
-
-"""" comment/ uncomment in V-LINE mode
-vmap <S-c>                  :s/^/#/<CR> :noh<CR>
-vmap <S-c><S-c>             :s/^#//<CR> :noh<CR>
 
 "---- [PLUGIN MAPPINGS] ----"
 
@@ -138,6 +132,9 @@ nmap <Leader>6 <Plug>AirlineSelectTab6
 nmap <Leader>7 <Plug>AirlineSelectTab7
 nmap <Leader>8 <Plug>AirlineSelectTab8
 nmap <Leader>9 <Plug>AirlineSelectTab9
+
+"""" gitgutter
+nnoremap <Leader>g :GitGutterLineHighlightsToggle<CR>
 
 " =============================================================================
 " -- UNIX SPECIFIC ---- UNIX SPECIFIC ---- UNIX SPECIFIC ---- UNIX SPECIFIC ---
@@ -196,9 +193,9 @@ let g:airline#extensions#ctrlp#color_template = 'visual'
 " -- CTRL-P -- -- CTRL-P -- -- CTRL-P -- -- CTRL-P -- -- CTRL-P -- -- CTRL-P --
 " =============================================================================
 
-let g:ctrlp_cmd = 'call ToggleCtrlP()'
-
+let g:ctrlp_cmd     = 'call ToggleCtrlP()'
 let g:ctrlp_is_open = 0
+
 function! ToggleCtrlP()
     if g:ctrlp_is_open
         let g:ctrlp_is_open = 0
@@ -213,27 +210,18 @@ endfunction
 " -- NETRW CONFIG ---- NETRW CONFIG ---- NETRW CONFIG ---- NETRW CONFIG ---- NE
 " =============================================================================
 
-function! ToggleVExplorer()
-    if exists("t:explore_buffer_number")
-        let explore_window_number = bufwinnr(t:explore_buffer_number)
-        if explore_window_number != -1
-            let current_window_number = winnr()
-            exec explore_window_number . 'wincmd w'
-            close
-            exec current_window_number . 'wincmd w'
-            unlet t:explore_buffer_number
-        else
-            unlet t:explore_buffer_number
-        endif
-    else
-        Sexplore!
-        let t:explore_buffer_number = bufnr("%")
-    endif
-endfunction
+let g:netrw_keepdir   = 0
+let g:netrw_chgwin    = 1
+let g:netrw_liststyle = 0 " thin (change to 3 for tree)
+let g:netrw_altv      = 1 " open files on right
+let g:netrw_preview   = 1 " open previews vertically
 
 " =============================================================================
-" -- GIT ---- GIT ---- GIT ---- GIT ---- GIT ---- GIT ---- GIT ---- GIT ---- GI
+" -- SYNTASTIC ---- SYNTASTIC ---- SYNTASTIC ---- SYNTASTIC ---- SYNTASTIC ----
 " =============================================================================
 
-let g:gitgutter_enabled = 1
-let g:gitgutter_highlight_lines = 1
+let g:syntastic_enable_signs = 1
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
