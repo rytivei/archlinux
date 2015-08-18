@@ -92,6 +92,9 @@ augroup reload_vimrc " {
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
 augroup END " }
 
+"""" set working directory to current file in current window
+autocmd BufEnter * silent! lcd %:p:h
+
 " =============================================================================
 " -- KEYBINDINGS ---- KEYBINDINGS ---- KEYBINDINGS ---- KEYBINDINGS ---- KEYBIN
 " =============================================================================
@@ -104,8 +107,7 @@ let g:lt_quickfix_list_toggle_map = '<F5>'
 let g:lt_location_list_toggle_map = '<F6>'
 
 "---- [NORMAL KEY MAPPINGS] ----"
-nnoremap <Tab>              :bnext!<CR>
-nnoremap <Leader><Tab>      :bprevious!<CR>
+nnoremap <Leader><Tab>      :bnext!<CR>
 nnoremap <Leader><Right>    <C-w>l
 nnoremap <Leader><Up>       <C-w>k
 nnoremap <Leader><Down>     <C-w>j
