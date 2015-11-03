@@ -185,6 +185,9 @@ arch-chroot $root_mountpoint echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
 #### set timezone
 arch-chroot $root_mountpoint ln -s /usr/share/zoneinfo/Europe/Helsinki /etc/localtime
 
+#### set keymap
+arch-chroot /mnt/btrfs-current localectl set-keymap fi
+
 #### set system clock
 arch-chroot $root_mountpoint hwclock --systohc --utc
 
