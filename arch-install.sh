@@ -23,13 +23,16 @@ echo "----------------------------"
 read -p "Are you ready to continue ? [PRESS ENTER]" x
 
 lsblk
+echo ""
+echo ""
 echo "Partitioning the disk is the first thing to do."
-echo "Set partitioning style to MBR for this script to work. "
+echo "Set partitioning style to 'msdos' in MBR for this script to work. "
+echo ""
 echo "We will run 'parted' in interactive mode. Give following commands."
 echo "mklabel msdos"
 echo "quit"
-
 read -p "Are you ready to continue ? [PRESS ENTER]" x
+parted
 
 echo "Decide which mountpoints get their own partition."
 echo "**** at least 'swap' and '/' need their own partitions ***"
