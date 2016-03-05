@@ -169,7 +169,7 @@ echo "tmpfs    /dev/shm    tmpfs    nodev,nosuid,noexec 0 0"  >> $root_mountpoin
 #### install grub
 lsblk
 read -p "Give full path to BOOT __device__: " boot_dev
-arch-chroot $root_mountpoint grub-install --target=i386-pc --recheck --debug $boot_dev
+arch-chroot $root_mountpoint grub-install --force --target=i386-pc --recheck --debug $boot_dev
 if [ "$root_fstype" = "btrfs" ]; then
     arch-chroot $root_mountpoint sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"init=/lib/systemd/systemd ipv6.disable=1\"|" /etc/default/grub
 else
