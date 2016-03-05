@@ -31,14 +31,13 @@ echo ""
 echo "We will run 'parted' in interactive mode. Give following commands."
 echo "mklabel msdos"
 echo "quit"
-read -p "Are you ready to continue ? [PRESS ENTER]" x
-parted
-
+echo ""
 echo "Decide which mountpoints get their own partition."
 echo "**** at least 'swap' and '/' need their own partitions ***"
 read -p "Do you want partition the disk ? [yes/no] " partition
 if [ "$partition" = "yes" ]; then
     read -p "Give the __device__ to partition: " partition
+    parted $partition
     cfdisk $partition
 fi
 
