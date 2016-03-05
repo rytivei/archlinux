@@ -178,6 +178,19 @@ fi
 arch-chroot $root_mountpoint sed -i "s|^GRUB_GFXMODE=.*|GRUB_GFXMODE=1024x768x32,auto|g"                                         /etc/default/grub
 arch-chroot $root_mountpoint grub-mkconfig -o /boot/grub/grub.cfg
 
+if [ "$root_fstype" = "btrfs" ]; then
+    #### btrfs hook to initramfs
+    arch-chroot $root_mountpoint sed -i "s|MODULES=\"\"|MODULES=\"crc32c\"|g" /etc/mkinitcpio.conf
+    arch-chroot $root_mountpoint sed -i "s| fsck\"| fsck btrfs\"|g"           /etc/mkinitcpio.conf
+fi
+
+if [ "$root_crypt" = "yes" ]; then
+    echo "[INFO] add 'encrypt' to HOOKS in /etc/mkinitcpio.conf"
+    arch-chroot $root_mountpoint
+fi
+
+arch-chroot $root_mountpoint mkinitcpio -p linux
+
 #### set locale
 arch-chroot $root_mountpoint sed -i "s|#en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|g" /etc/locale.gen
 arch-chroot $root_mountpoint locale-gen
@@ -241,19 +254,6 @@ if [ "$virtualbox" = "yes" ]; then
     arch-chroot $root_mountpoint systemctl enable vboxservice.service
     arch-chroot $root_mountpoint gpasswd -a $username vboxsf
 fi
-
-if [ "$root_fstype" = "btrfs" ]; then
-    #### btrfs hook to initramfs
-    arch-chroot $root_mountpoint sed -i "s|MODULES=\"\"|MODULES=\"crc32c\"|g" /etc/mkinitcpio.conf
-    arch-chroot $root_mountpoint sed -i "s| fsck\"| fsck btrfs\"|g"           /etc/mkinitcpio.conf
-fi
-
-if [ "$root_crypt" = "yes" ]; then
-    echo "[INFO] add 'encrypt' to HOOKS in /etc/mkinitcpio.conf"
-    arch-chroot $root_mountpoint
-fi
-
-arch-chroot $root_mountpoint mkinitcpio -p linux
 
 umount -R $root_mountpoint
 if [ "$root_fstype" = "btrfs" ]; then
