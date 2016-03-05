@@ -24,6 +24,13 @@ read -p "Are you ready to continue ? [PRESS ENTER]" x
 
 lsblk
 echo "Partitioning the disk is the first thing to do."
+echo "Set partitioning style to MBR for this script to work. "
+echo "We will run 'parted' in interactive mode. Give following commands."
+echo "mklabel msdos"
+echo "quit"
+
+read -p "Are you ready to continue ? [PRESS ENTER]" x
+
 echo "Decide which mountpoints get their own partition."
 echo "**** at least 'swap' and '/' need their own partitions ***"
 read -p "Do you want partition the disk ? [yes/no] " partition
@@ -33,7 +40,6 @@ if [ "$partition" = "yes" ]; then
 fi
 
 lsblk
-
 echo "#### ROOT partition ####"
 read -p "Give full path to ROOT partition: " root_part
 read -p "Give FS type for ROOT partition (ext4 or btrfs): " root_fstype
@@ -158,6 +164,18 @@ genfstab -U -p $root_mountpoint > $root_mountpoint/etc/fstab
 echo "tmpfs    /tmp        tmpfs    nodev,nosuid        0 0"  >> $root_mountpoint/etc/fstab
 echo "tmpfs    /dev/shm    tmpfs    nodev,nosuid,noexec 0 0"  >> $root_mountpoint/etc/fstab
 
+#### install grub
+lsblk
+read -p "Give full path to BOOT __device__: " boot_dev
+arch-chroot $root_mountpoint grub-install --target=i386-pc --recheck --debug $boot_dev
+if [ "$root_fstype" = "btrfs" ]; then
+    arch-chroot $root_mountpoint sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"init=/lib/systemd/systemd ipv6.disable=1\"|" /etc/default/grub
+else
+    arch-chroot $root_mountpoint sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"ipv6.disable=1\"|" /etc/default/grub
+fi
+arch-chroot $root_mountpoint sed -i "s|^GRUB_GFXMODE=.*|GRUB_GFXMODE=1024x768x32,auto|g"                                         /etc/default/grub
+arch-chroot $root_mountpoint grub-mkconfig -o /boot/grub/grub.cfg
+
 #### set locale
 arch-chroot $root_mountpoint sed -i "s|#en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|g" /etc/locale.gen
 arch-chroot $root_mountpoint locale-gen
@@ -190,18 +208,6 @@ arch-chroot $root_mountpoint useradd --create-home --groups wheel,users,uucp -s 
 arch-chroot $root_mountpoint chfn $username
 echo "Give $username a password."
 arch-chroot $root_mountpoint passwd $username
-
-#### install grub
-lsblk
-read -p "Give full path to BOOT __device__: " boot_dev
-arch-chroot $root_mountpoint grub-install --target=i386-pc --recheck --debug $boot_dev
-if [ "$root_fstype" = "btrfs" ]; then
-    arch-chroot $root_mountpoint sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"init=/lib/systemd/systemd ipv6.disable=1\"|" /etc/default/grub
-else
-    arch-chroot $root_mountpoint sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"ipv6.disable=1\"|" /etc/default/grub
-fi
-arch-chroot $root_mountpoint sed -i "s|^GRUB_GFXMODE=.*|GRUB_GFXMODE=1024x768x32,auto|g"                                         /etc/default/grub
-arch-chroot $root_mountpoint grub-mkconfig -o /boot/grub/grub.cfg
 
 #### networking
 echo "[INFO] setup dhcp networking ..."
