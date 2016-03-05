@@ -2,11 +2,6 @@
 
 loadkeys fi
 
-read -p "Will you use WiFi for the setup ? [yes/no]" wifi
-if [ "$wifi" = "yes" ]; then
-    wifi-menu
-fi
-
 echo "[INFO] checking internet connection ..."
 ping -c3 www.google.com
 if [ $? -ne 0 ]; then
@@ -88,10 +83,14 @@ if [ "$root_fstype" = "btrfs" ]; then
     fi
 
 elif [ "$root_fstype" = "ext4" ]; then
-
     root_mountpoint="/mnt/ext4_root"
 
-    mkfs.ext4 -L rootfs $root_part
+    if [ "$root_crypt" = "yes" ]; then
+        mkfs.ext4 -L rootfs /dev/mapper/cryptroot
+    else
+        mkfs.ext4 -L rootfs $root_part
+    fi
+
     mkdir $root_mountpoint
 
     if [ "$root_crypt" = "yes" ]; then
@@ -101,12 +100,18 @@ elif [ "$root_fstype" = "ext4" ]; then
     fi
 
     if [ "$root_crypt" = "yes" ]; then
+        echo "unmount $root_mountpoint"
         umount $root_mountpoint
+
+        echo "cryptsetup close cryptroot"
         cryptsetup close cryptroot
+
+        echo "cryptsetup open $root_part cryptroot"
         cryptsetup open $root_part cryptroot
+
+        echo "mount /dev/mapper/cryptroot $root_mountpoint"
         mount /dev/mapper/cryptroot $root_mountpoint
     fi
-
 else
     echo "You chose something else than 'ext4' or 'btrfs', exiting ..."
     exit 1
