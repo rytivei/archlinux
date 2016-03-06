@@ -1,67 +1,67 @@
 #!/bin/bash
 
-loadkeys fi
-
+echo ""
 echo "[INFO] checking internet connection ..."
+echo ""
+
 ping -c3 www.google.com
 if [ $? -ne 0 ]; then
     echo "[ERROR] no Internet connection, exiting ..."
     exit 1
 fi
 
+loadkeys fi
+
+echo ""
 echo "----------------------------"
 echo " This script will install Arch Linux with following configuration."
 echo ""
-echo " / can be BTRFS and you can have mountpoints as subvolumes under it."
-echo " All other basic mountpoints that are not subvolumes are on their own partition."
+echo " ROOTFS (/) can be BTRFS (and optionally some mountpoints as subvolumes under it)"
 echo " OR"
-echo " / can be EXT4 (with encryption optionally)."
+echo " ROOTFS (/) can be EXT4 (optionally with encryption)"
 echo ""
-echo " --> Boots to KDE desktop with a user that has sudo rights."
+echo " All other basic mountpoints are on their own partition."
 echo "----------------------------"
 
-read -p "Are you ready to continue ? [PRESS ENTER]" x
+read -p "Are you ready to continue ? [PRESS ENTER]" answer
 
 lsblk
 echo ""
 echo ""
 echo "Partitioning the disk is the first thing to do."
-echo "Set partitioning style to 'msdos' in MBR for this script to work. "
-echo ""
-echo "We will run 'parted' in interactive mode. Give following commands."
-echo "mklabel msdos"
-echo "quit"
 echo ""
 echo "Decide which mountpoints get their own partition."
-echo "**** at least 'swap' and '/' need their own partitions ***"
-read -p "Do you want partition the disk ? [yes/no] " partition
-if [ "$partition" = "yes" ]; then
-    read -p "Give the __device__ to partition: " partition
-    parted $partition
-    cfdisk $partition
+
+read -p "Do you want partition the disk ? [yes/no]: " answer
+if [ "$answer" = "yes" ]; then
+
+    read -p "Give the __device__ to partition: " device_path
+
+    echo "We will run 'parted' in interactive mode. Give following commands."
+    echo "mklabel msdos"
+    echo "quit"
+    echo ""
+
+    parted $device_path
+    cfdisk $device_path
 fi
 
 lsblk
 echo "#### ROOT partition ####"
 read -p "Give full path to ROOT partition: " root_part
+read -p "Do you want to encrypt the ROOT partition ? (does not work with btrfs) [yes/no]: " root_crypt
 read -p "Give FS type for ROOT partition (ext4 or btrfs): " root_fstype
-read -p "Do you want to encrypt the ROOT partition? [yes/no]: " root_crypt
-
-if [ "$root_crypt" = "yes" -a "$root_fstype" = "btrfs" ]; then
-    echo "[ERROR] you can't use encryption with BTRFS, exiting"
-    exit 1
-fi
-
-if [ "$root_crypt" = "yes" ]; then
-    cryptsetup -y -v luksFormat $root_part
-    cryptsetup open $root_part cryptroot
-fi
 
 if [ "$root_fstype" = "btrfs" ]; then
+
+    if [ "$root_crypt" = "yes" ]; then
+        echo "[ERROR] you can't use encryption with BTRFS, exiting ..."
+        exit 1
+    fi
+
     root_mountpoint="/mnt/btrfs-current"
 
     mkfs.btrfs -f -L rootfs $root_part
-
     mkdir /mnt/btrfs-root
     mount $root_part /mnt/btrfs-root
 
@@ -74,13 +74,12 @@ if [ "$root_fstype" = "btrfs" ]; then
 
     echo "#### BTRFS subvolumes ####"
     echo "Give a list of mountpoints that will be btrfs subvolumes under ROOT."
-    echo "Giving an empty value means:"
-    echo "  --> All mountpoints can be on their separate partition"
+    echo "Giving an empty value means"
+    echo "  --> all mountpoints will be on their separate partition"
     echo "  --> or just under /"
     read -p "Give subvolume list: " subvolumes
 
     if [ -n "$subvolumes" ]; then
-
         for mountpoint in $subvolumes; do
             echo "[INFO] SUBVOLUM-ING: __${mountpoint}__"
             btrfs subvolume create /mnt/btrfs-root/__current/$mountpoint
@@ -91,34 +90,19 @@ if [ "$root_fstype" = "btrfs" ]; then
     fi
 
 elif [ "$root_fstype" = "ext4" ]; then
+
     root_mountpoint="/mnt/ext4_root"
 
     if [ "$root_crypt" = "yes" ]; then
+        cryptsetup -y -v luksFormat $root_part
+        cryptsetup open $root_part cryptroot
         mkfs.ext4 -L rootfs /dev/mapper/cryptroot
+        mkdir $root_mountpoint
+        mount /dev/mapper/cryptroot $root_mountpoint
     else
         mkfs.ext4 -L rootfs $root_part
-    fi
-
-    mkdir $root_mountpoint
-
-    if [ "$root_crypt" = "yes" ]; then
-        mount /dev/mapper/cryptroot $root_mountpoint
-    else
+        mkdir $root_mountpoint
         mount $root_part $root_mountpoint
-    fi
-
-    if [ "$root_crypt" = "yes" ]; then
-        echo "unmount $root_mountpoint"
-        umount $root_mountpoint
-
-        echo "cryptsetup close cryptroot"
-        cryptsetup close cryptroot
-
-        echo "cryptsetup open $root_part cryptroot"
-        cryptsetup open $root_part cryptroot
-
-        echo "mount /dev/mapper/cryptroot $root_mountpoint"
-        mount /dev/mapper/cryptroot $root_mountpoint
     fi
 else
     echo "You chose something else than 'ext4' or 'btrfs', exiting ..."
@@ -139,9 +123,9 @@ echo "$mountpoint_is_partition"
 
 for mountpoint in $mountpoint_is_partition; do
 
-    read -p "Will mountpoint __${mountpoint}__ be on a separate partition ? [yes/no]: " partition
+    read -p "Will mountpoint __${mountpoint}__ be on a separate partition ? [yes/no]: " answer
 
-    if [ "$partition" = "yes" ]; then
+    if [ "$answer" = "yes" ]; then
         lsblk
         read -p "Give full path to __${mountpoint}__ partition: " partition
         read -p "Give filesystem type to format __${mountpoint}__ partition: " fstype
@@ -170,14 +154,11 @@ echo "tmpfs    /dev/shm    tmpfs    nodev,nosuid,noexec 0 0"  >> $root_mountpoin
 lsblk
 read -p "Give full path to BOOT __device__: " boot_dev
 arch-chroot $root_mountpoint grub-install --force --target=i386-pc --recheck --debug $boot_dev
-if [ "$root_fstype" = "btrfs" ]; then
-    arch-chroot $root_mountpoint sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"init=/lib/systemd/systemd ipv6.disable=1\"|" /etc/default/grub
-else
-    arch-chroot $root_mountpoint sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"ipv6.disable=1\"|" /etc/default/grub
-fi
-arch-chroot $root_mountpoint sed -i "s|^GRUB_GFXMODE=.*|GRUB_GFXMODE=1024x768x32,auto|g"                                         /etc/default/grub
+arch-chroot $root_mountpoint sed -i "s|^GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=$root_part_uuid:cryptroot root=/dev/mapper/cryptroot init=/lib/systemd/systemd ipv6.disable=1\"|" /etc/default/grub
+arch-chroot $root_mountpoint sed -i "s|^GRUB_GFXMODE=.*|GRUB_GFXMODE=1024x768x32,auto|g" /etc/default/grub
 arch-chroot $root_mountpoint grub-mkconfig -o /boot/grub/grub.cfg
 
+#### modify initramfs
 if [ "$root_fstype" = "btrfs" ]; then
     #### btrfs hook to initramfs
     arch-chroot $root_mountpoint sed -i "s|MODULES=\"\"|MODULES=\"crc32c\"|g" /etc/mkinitcpio.conf
@@ -186,6 +167,7 @@ fi
 
 if [ "$root_crypt" = "yes" ]; then
     echo "[INFO] add 'encrypt' to HOOKS in /etc/mkinitcpio.conf"
+    echo "Just 'fg' after exiting arch-chroot as script will be suspended to background."
     arch-chroot $root_mountpoint
 fi
 
@@ -245,8 +227,7 @@ echo ""
 sleep 5
 
 #### install rest of the packages
-arch-chroot $root_mountpoint pacman -S base-devel abs htop bash-completion vim terminus-font git cronie yakuake xorg-server xorg-drivers xorg-apps dri2proto plasma sddm kdeadmin kdebase kdegraphics kdemultimedia kdesdk kdeutils
-arch-chroot $root_mountpoint systemctl enable sddm
+arch-chroot $root_mountpoint pacman -S base-devel abs htop bash-completion vim terminus-font cronie xorg-server xorg-drivers xorg-apps dri2proto
 
 read -p "Is this Arch Linux installation done inside Virtualbox ? [yes/no]: " virtualbox
 if [ "$virtualbox" = "yes" ]; then
