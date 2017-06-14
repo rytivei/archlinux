@@ -50,7 +50,8 @@ call vundle#begin(path)
 
 "---- [github] ----"
 Bundle 'gmarik/vundle'
-Bundle 'bling/vim-airline'
+Bundle 'vim-airline/vim-airline'
+Bundle 'vim-airline/vim-airline-themes'
 Bundle 'kien/ctrlp.vim'
 Bundle 'scrooloose/syntastic'
 Bundle 'airblade/vim-gitgutter'
@@ -81,6 +82,7 @@ set smartcase
 set tabstop=4
 set shiftwidth=4
 set expandtab
+set colorcolumn=80
 set omnifunc=syntaxcomplete#Complete
 syntax enable
 :highlight Pmenu ctermbg=238 gui=bold
@@ -102,6 +104,7 @@ autocmd BufEnter * silent! lcd %:p:h
 "---- [FUNCTION KEY MAPPINGS] ----"
 nnoremap <F1>                     :vertical help<Space>
 nnoremap <silent><F2>             :TagbarToggle<CR>
+nnoremap <F4>                     :execute "vimgrep /" . expand("<cword>") . "/j **" <Bar> cw<CR>
 let g:ctrlp_map                   = '<F3>'
 let g:lt_quickfix_list_toggle_map = '<F5>'
 let g:lt_location_list_toggle_map = '<F6>'
@@ -195,8 +198,12 @@ let g:airline#extensions#ctrlp#color_template = 'visual'
 " -- CTRL-P -- -- CTRL-P -- -- CTRL-P -- -- CTRL-P -- -- CTRL-P -- -- CTRL-P --
 " =============================================================================
 
-let g:ctrlp_cmd     = 'call ToggleCtrlP()'
-let g:ctrlp_is_open = 0
+let g:ctrlp_cmd       = 'call ToggleCtrlP()'
+let g:ctrlp_is_open   = 0
+""""let g:ctrlp_max_files = 0
+""""let g:ctrlp_max_depth = 40
+let g:ctrlp_working_path_mode = 'ra'
+let g:ctrlp_by_filename = 1
 
 function! ToggleCtrlP()
     if g:ctrlp_is_open
